@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:f="http://xmlns.jcp.org/jsf/core" xmlns:c="http://java.sun.com/jsp/jstl/core"
+      xmlns:p="http://primefaces.org/ui" >
+<f:view>
+<h:head>
+    <title>Document</title>
+</h:head>
+<h:body>
+
+    <h:form>
+        <p:panel header="Password Manager">
+            <p:outputLabel for="username" value="Username: "/>
+
+            <h:inputText id="username" title="Binding with ManagedBean"
+                         value="#{navigationController.username}">
+            </h:inputText>
+            <br/>
+            <p:outputLabel for="password" value="Password: "/>
+            <h:inputSecret id="password" title="Binding with ManagedBean"
+                         value="#{navigationController.password}">
+            </h:inputSecret>
+
+            <br/>
+
+            <h:commandButton id="loginButton" value="Login" action="#{navigationController.login}"/>
+            #{navigationController.unsuccessfulLogin}
+
+        </p:panel>
+    </h:form>
+
+</h:body>
+</f:view>
+</html>
