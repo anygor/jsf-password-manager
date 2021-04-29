@@ -100,7 +100,7 @@ public class User {
 
     }
 
-    public Connection getConnection() {
+    private Connection getConnection() {
         Connection con = null;
         String url = "jdbc:mysql://localhost:3306/user_management";
         String user = "root";

@@ -1,23 +1,25 @@
 import org.apache.log4j.Logger;
 
 import java.io.Serializable;
+import java.sql.*;
 import java.util.Date;
 
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ManagedProperty;
 import javax.faces.bean.RequestScoped;
+import javax.faces.bean.SessionScoped;
 
 @ManagedBean(name = "navigationController", eager = true)
-@RequestScoped
+@SessionScoped
 public class NavigationController implements Serializable {
     private static final long serialVersionUID = 1L;
     private static final Logger log = Logger.getLogger(NavigationController.class);
     private static final Logger logFile = Logger.getLogger("LoggerFile");
-    @ManagedProperty(value = "#{param.pageId}")
     private String pageId;
 
     private String username;
     private String password;
+    private Long userId;
     private String message;
     private String unsuccessfulLogin;
 
@@ -115,6 +117,14 @@ public class NavigationController implements Serializable {
         this.secondPasswordChanger = secondPasswordChanger;
     }
 
+    public Long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Long userId) {
+        this.userId = userId;
+    }
+
     public String login() {
         User user = new User(this.getUsername(), Cypher.md5Custom(this.getPassword()));
         if (user.getId() != null) {
@@ -122,24 +132,76 @@ public class NavigationController implements Serializable {
             message = "You have successfully logged in as " + user.getFirstName() + " " + user.getLastName();
             log.info("Successful login attempt at " +  new Date(System.currentTimeMillis()).toString() + " \n user - " + user.getId() + ". " +  user.getUsername());
             logFile.info("Successful login attempt at " +  new Date(System.currentTimeMillis()).toString() + " \n user - " + user.getId() + ". " +  user.getUsername());
+            username = this.getUsername();
+            userId = user.getId();
             return "interface";
         } else {
             unsuccessfulLogin = "Wrong username or password";
             log.info("Unsuccessful login attempt at " +  new Date(System.currentTimeMillis()).toString() + " \n user - " + this.getUsername());
-            logFile.info("Unuccessful login attempt at " +  new Date(System.currentTimeMillis()).toString() + " \n user - " + this.getUsername());
+            logFile.info("Unsuccessful login attempt at " +  new Date(System.currentTimeMillis()).toString() + " \n user - " + this.getUsername());
             return "index";
         }
     }
 
     public String changePassword() {
         if (this.getFirstPasswordChanger().equals(this.getSecondPasswordChanger())) {
-            unsuccessfulLogin = "Password changed";
-            log.info("Successful password change attempt at " +  new Date(System.currentTimeMillis()).toString());
-            return "index";
+            if (changePasswordInDB(this.getFirstPasswordChanger())) {
+                unsuccessfulLogin = "Password changed";
+                log.info("Successful password change attempt at " + new Date(System.currentTimeMillis()).toString());
+                return "index";
+            } else {
+                unsuccessfulLogin = "Password didn't update";
+                log.info("Unsuccessful password change attempt at " +  new Date(System.currentTimeMillis()).toString());
+                return "interface";
+            }
         } else {
             unsuccessfulLogin = "Passwords don't match";
             log.info("Unsuccessful password change attempt at " +  new Date(System.currentTimeMillis()).toString());
             return "interface";
         }
+    }
+
+    public String showIndex() {
+        return "index";
+    }
+
+    private boolean changePasswordInDB(String password) {
+        PreparedStatement pst = null;
+        Connection con = getConnection();
+        String stm = "UPDATE user SET `password` = ? WHERE `id` = ? AND `username` = ?;";
+        try {
+            pst = con.prepareStatement(stm);
+            pst.setString(1, Cypher.md5Custom(password));
+            pst.setLong(2, this.userId);
+            pst.setString(3, this.username);
+            pst.execute();
+            return true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    private Connection getConnection() {
+        Connection con = null;
+        String url = "jdbc:mysql://localhost:3306/user_management";
+        String user = "root";
+        String password = "";
+        try {
+            Class.forName("com.mysql.jdbc.Driver");
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        try {
+            con = DriverManager.getConnection(url, user, password);
+            System.out.println("Connection completed.");
+        } catch (SQLException ex) {
+            System.out.println(ex.getMessage());
+        }
+
+        finally {
+        }
+        return con;
     }
 } 
