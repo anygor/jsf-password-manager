@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:f="http://xmlns.jcp.org/jsf/core" xmlns:c="http://java.sun.com/jsp/jstl/core"
+      xmlns:p="http://primefaces.org/ui" >
+<f:view>
+    <h:head>
+        <title>Document</title>
+    </h:head>
+    <h:body>
+
+        <h:form>
+            <p:panel header="Password Manager">
+                #{navigationController.message}
+                You are logged in as administrator
+            </p:panel>
+
+            <p:outputLabel for="firstPasswordChanger" value="To change your password, type it in the field below: "/>
+
+            <h:inputSecret id="firstPasswordChanger"
+                           value="#{navigationController.firstPasswordChanger}">
+            </h:inputSecret>
+            <br/>
+
+            <p:outputLabel for="secondPasswordChanger" value="And confirm your password: "/>
+            <h:inputSecret id="secondPasswordChanger"
+                           value="#{navigationController.secondPasswordChanger}">
+            </h:inputSecret>
+
+            <br/>
+
+            <h:commandButton id="changePassword" value="Change password" action="#{navigationController.changePassword}"/>
+            #{navigationController.unsuccessfulLogin}
+
+            <h:commandButton id="exit" value="Exit" action="#{navigationController.showIndex}"/>
+
+            <p:panel>
+                <ui:repeat value="#{navigationController.users}" var="user">
+                    <table style="background: #F0F8FF">
+                        <tr><td>#{user.username}</td></tr>
+                        <tr><td>#{user.password}</td></tr>
+                        <tr><td>#{user.firstName} #{user.lastName}</td></tr>
+                        <tr><td>#{user.id}</td></tr>
+                        <tr><td>#{user.position}</td></tr>
+                        <tr><td>#{user.role}</td></tr>
+                    </table><br/>
+                </ui:repeat>
+            </p:panel>
+        </h:form>
+
+    </h:body>
+</f:view>
+</html>

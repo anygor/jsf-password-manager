@@ -3,6 +3,8 @@ import org.apache.log4j.Logger;
 import java.io.Serializable;
 import java.sql.*;
 import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
 
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ManagedProperty;
@@ -26,6 +28,7 @@ public class NavigationController implements Serializable {
     private String firstPasswordChanger;
     private String secondPasswordChanger;
 
+    private List<User> users;
 
     public String moveToPage1() {
         return "page1";
@@ -125,6 +128,14 @@ public class NavigationController implements Serializable {
         this.userId = userId;
     }
 
+    public List<User> getUsers() {
+        return users;
+    }
+
+    public void setUsers(List<User> users) {
+        this.users = users;
+    }
+
     public String login() {
         User user = new User(this.getUsername(), Cypher.md5Custom(this.getPassword()));
         if (user.getId() != null) {
@@ -134,7 +145,12 @@ public class NavigationController implements Serializable {
             logFile.info("Successful login attempt at " +  new Date(System.currentTimeMillis()).toString() + " \n user - " + user.getId() + ". " +  user.getUsername());
             username = this.getUsername();
             userId = user.getId();
-            return "interface";
+            if (user.getRole().equals("admin")) {
+                users = getUsersFromDB();
+                return "adminInterface";
+            } else {
+                return "interface";
+            }
         } else {
             unsuccessfulLogin = "Wrong username or password";
             log.info("Unsuccessful login attempt at " +  new Date(System.currentTimeMillis()).toString() + " \n user - " + this.getUsername());
@@ -179,6 +195,33 @@ public class NavigationController implements Serializable {
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
+        }
+    }
+
+    private List<User> getUsersFromDB() {
+        users = new LinkedList<>();
+        ResultSet rs = null;
+        Connection con = getConnection();
+        String stm = "SELECT * FROM user";
+        PreparedStatement pst = null;
+        try {
+            pst = con.prepareStatement(stm);
+            rs = pst.executeQuery();
+            while (rs.next()) {
+                User item = new User();
+                item.setId(rs.getLong(1));
+                item.setFirstName(rs.getString(2));
+                item.setLastName(rs.getString(3));
+                item.setPosition(rs.getString(4));
+                item.setUsername(rs.getString(5));
+                item.setPassword(rs.getString(6));
+                item.setRole(rs.getString(7));
+                users.add(item);
+            }
+            return users;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
         }
     }
 
