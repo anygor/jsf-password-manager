@@ -14,6 +14,23 @@
             <p:panel header="Password Manager">
                 #{navigationController.message}
             </p:panel>
+
+            <p:outputLabel for="firstPasswordChanger" value="To change your password, type it in the field below: "/>
+
+            <h:inputSecret id="firstPasswordChanger"
+                         value="#{navigationController.firstPasswordChanger}">
+            </h:inputSecret>
+            <br/>
+
+            <p:outputLabel for="secondPasswordChanger" value="And confirm your password: "/>
+            <h:inputSecret id="secondPasswordChanger"
+                           value="#{navigationController.secondPasswordChanger}">
+            </h:inputSecret>
+
+            <br/>
+
+            <h:commandButton id="changePassword" value="Change password" action="#{navigationController.changePassword}"/>
+            #{navigationController.unsuccessfulLogin}
         </h:form>
 
     </h:body>
